@@ -3,6 +3,8 @@
 % Desc: Useful functions for lab calculations
 %
 
+1;
+
 % getintersect: Get intersection between to data point curves. x1 and x2 are
 % assumed to be ordered.
 function pts = getintersect(x1, y1, x2, y2)
