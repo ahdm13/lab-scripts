@@ -23,6 +23,16 @@ plotgraph(scc_x_r1, scc_y_r1, 'Short Circuit Characteristics', 'I_F (A)', ...
 plotgraph(zpf_x_r1, zpf_y_r1, 'Zero Power Factor Curve (I_A = 5A)', ...
 	'I_F (A)', 'V (V)', 'zpf_r1.jpg')
 
+% Plot (Revision 2)
+% ------------------
+plotgraph(occ_x_r2, occ_y_r2, 'Open Circuit Characteristics', 'I_F (A)', ...
+	'V_{OC} (V)', 'occ_r2.jpg')
+plotgraph(scc_x_r2, scc_y_r2, 'Short Circuit Characteristics', 'I_F (A)', ...
+	'I_{SC} (A)', 'scc_r2.jpg')
+plotgraph(zpf_x_r2, zpf_y_r2, 'Zero Power Factor Curve (I_A = 5A)', ...
+	'I_F (A)', 'V (V)', 'zpf_r2.jpg')
+
+
 % ==============================================================================
 % Values assumed
 
@@ -181,5 +191,6 @@ endif
 
 hold off
 grid on
+print('potier_triangle.jpg', '-djpg')
 
 clear zpf_rated_if
