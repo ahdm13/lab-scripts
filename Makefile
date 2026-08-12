@@ -8,8 +8,7 @@ all:
 
 .PHONY: clean
 clean:
-	find -type f -name '*.jpg' -delete
-	find -type f -name '*.png' -delete
+	rm -f data.m *.jpg *.png
 
 %:
 	cp $(DATADIR)/$@.m $(SRCROOT)/data.m
