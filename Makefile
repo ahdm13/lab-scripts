@@ -7,5 +7,5 @@ clean:
 	find -type f -name '*.png' -delete
 
 %:
-	cp $(DATADIR)/%.m $(SRCROOT)
-	octave $(SRCROOT)/%.m
+	cp $(DATADIR)/$@.m $(SRCROOT)/data.m
+	octave $(SRCROOT)/$@.m
