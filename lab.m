@@ -76,29 +76,405 @@ function pts = getintersect(x1, y1, x2, y2)
 endfunction
 
 % plotgraph: Plot a graph and save it as a jpeg.
-function plotgraph(x, y, t, xl, yl, filename)
-	plot(x, y)
+function [p, xp, yp] = plotgraph(x, y, t, xl, yl)
+	p = plot(x, y)
 	title(t)
 	xlabel(xl)
 	ylabel(yl)
 	ax = gca()
-	line(get(ax, 'XLim'), [0, 0], 'Color', 'k', 'LineWidth', 1.5) 
-	line([0, 0], get(ax, 'YLim'), 'Color', 'k', 'LineWidth', 1.5) 
+	xp = line(get(ax, 'XLim'), [0, 0], 'Color', 'k', 'LineWidth', 1.5) 
+	yp = line([0, 0], get(ax, 'YLim'), 'Color', 'k', 'LineWidth', 1.5) 
 	grid on
-	print(filename, '-djpg')
 endfunction
 
 % plotgraph_nsx: Plot a graph and save it as a jpeg. X-axis is unordered.
-function plotgraph_nsx(x, y, ogi, t, xl, yl, filename)
-	plot(1:length(x), y)
+function [p, xp, yp] = plotgraph_nsx(x, y, ogi, t, xl, yl)
+	p = plot(1:length(x), y)
 	title(t)
 	xlabel(xl)
 	ylabel(yl)
 	set(gca, 'XTick', 1:length(x))
 	set(gca, 'XTickLabel', x)
 	ax = gca()
-	line(get(ax, 'XLim'), [0, 0], 'Color', 'k', 'LineWidth', 1.5) 
-	line([ogi, ogi], get(ax, 'YLim'), 'Color', 'k', 'LineWidth', 1.5) 
+	xp = line(get(ax, 'XLim'), [0, 0], 'Color', 'k', 'LineWidth', 1.5) 
+	yp = line([ogi, ogi], get(ax, 'YLim'), 'Color', 'k', 'LineWidth', 1.5) 
 	grid on
+endfunction
+
+function savegraph(filename)
 	print(filename, '-djpg')
+endfunction
+
+function newstate = table_start(data, spacing, mrow, mcol)
+	printf('\n')
+	printf('┌')
+	for i = 1:(length(data) - 1)
+		for j = 1:spacing
+			printf('─')
+		endfor
+		if (mcol(i) ~= 0)
+			printf('─')
+		else
+			printf('┬')
+		end
+	end
+	for j = 1:spacing
+		printf('─')
+	endfor
+	if (mcol(length(data)) ~= 0)
+		printf('─')
+	else
+		printf('┐')
+	endif
+	printf('\n')
+
+	printf('│')
+	for i = 1:length(data)
+		printf('%-*s', spacing, data{i})
+		if (mcol(i) ~= 0)
+			printf(' ')
+		else
+			printf('│')
+		endif
+	endfor
+	printf('\n')
+
+	newstate = zeros(2, length(data));
+	for i = 1:length(data)
+		newstate(1, i) = mrow(i);
+		newstate(2, i) = mcol(i);
+	endfor
+endfunction
+
+function newstate = table_row(oldstate, data, spacing, mrow, mcol)
+	if (oldstate(1, 1) ~= 0)
+		printf('│')
+	else
+		printf('├')
+	endif
+	for i = 1:(length(data) - 1)
+		if (oldstate(1, i) ~= 0)
+			for j = 1:spacing
+				printf(' ')
+			endfor
+			if (oldstate(2, i) ~= 0)
+				if (mcol(i) ~= 0)
+					if (oldstate(1, i + 1) ~= 0)
+						printf(' ')
+					else
+						printf('╶')
+					endif
+				else
+					if (oldstate(1, i + 1) ~= 0)
+						printf('╷')
+					else
+						printf('┌')
+					endif
+				endif
+			else
+				if (mcol(i) ~= 0)
+					if (oldstate(1, i + 1) ~= 0)
+						printf('╵')
+					else
+						printf('└')
+					endif
+				else
+					if (oldstate(1, i + 1) ~= 0)
+						printf('│')
+					else
+						printf('├')
+					endif
+				endif
+			endif
+		else
+			for j = 1:spacing
+				printf('─')
+			endfor
+			if (oldstate(2, i) ~= 0)
+				if (mcol(i) ~= 0)
+					if (oldstate(1, i + 1) ~= 0)
+						printf('╴')
+					else
+						printf('─')
+					endif
+				else
+					if (oldstate(1, i + 1) ~= 0)
+						printf('┐')
+					else
+						printf('┬')
+					endif
+				endif
+			else
+				if (mcol(i) ~= 0)
+					if (oldstate(1, i + 1) ~= 0)
+						printf('┘')
+					else
+						printf('┴')
+					endif
+				else
+					if (oldstate(1, i + 1) ~= 0)
+						printf('┤')
+					else
+						printf('┼')
+					endif
+				endif
+			endif
+		endif
+	endfor
+	if (oldstate(1, length(data)) ~= 0)
+		for j = 1:spacing
+			printf(' ')
+		endfor
+		if (oldstate(2, length(data)) ~= 0)
+			if (mcol(length(data)) ~= 0)
+				printf(' ')
+			else
+				printf('╷')
+			endif
+		else
+			if (mcol(length(data)) ~= 0)
+				printf('╵')
+			else
+				printf('│')
+			endif
+		endif
+	else
+		for j = 1:spacing
+			printf('─')
+		endfor
+		if (oldstate(2, length(data)) ~= 0)
+			if (mcol(length(data)) ~= 0)
+				printf('─')
+			else
+				printf('┐')
+			endif
+		else
+			if (mcol(length(data)) ~= 0)
+				printf('┘')
+			else
+				printf('┤')
+			endif
+		endif
+	endif
+	printf('\n')
+
+	printf('│')
+	for i = 1:length(data)
+		printf('%-*s', spacing, data{i})
+		if (mcol(i) ~= 0)
+			printf(' ')
+		else
+			printf('│')
+		endif
+	endfor
+	printf('\n')
+
+	newstate = zeros(2, length(data));
+	for i = 1:length(data)
+		newstate(1, i) = mrow(i);
+		newstate(2, i) = mcol(i);
+	endfor
+endfunction
+
+function newstate = table_row_data(oldstate, data, spacing, precision, mrow, mcol)
+	if (oldstate(2, 1) ~= 0)
+		printf('│')
+	else
+		printf('├')
+	endif
+	for i = 1:(length(data) - 1)
+		if (oldstate(1, i) ~= 0)
+			for j = 1:spacing
+				printf(' ')
+			endfor
+			if (oldstate(2, i) ~= 0)
+				if (mcol(i) ~= 0)
+					if (oldstate(1, i + 1) ~= 0)
+						printf(' ')
+					else
+						printf('╶')
+					endif
+				else
+					if (oldstate(1, i + 1) ~= 0)
+						printf('╷')
+					else
+						printf('┌')
+					endif
+				endif
+			else
+				if (mcol(i) ~= 0)
+					if (oldstate(1, i + 1) ~= 0)
+						printf('╵')
+					else
+						printf('└')
+					endif
+				else
+					if (oldstate(1, i + 1) ~= 0)
+						printf('│')
+					else
+						printf('├')
+					endif
+				endif
+			endif
+		else
+			for j = 1:spacing
+				printf('─')
+			endfor
+			if (oldstate(2, i) ~= 0)
+				if (mcol(i) ~= 0)
+					if (oldstate(1, i + 1) ~= 0)
+						printf('╴')
+					else
+						printf('─')
+					endif
+				else
+					if (oldstate(1, i + 1) ~= 0)
+						printf('┐')
+					else
+						printf('┬')
+					endif
+				endif
+			else
+				if (mcol(i) ~= 0)
+					if (oldstate(1, i + 1) ~= 0)
+						printf('┘')
+					else
+						printf('┴')
+					endif
+				else
+					if (oldstate(1, i + 1) ~= 0)
+						printf('┤')
+					else
+						printf('┼')
+					endif
+				endif
+			endif
+		endif
+	endfor
+	if (oldstate(1, length(data)) ~= 0)
+		for j = 1:spacing
+			printf(' ')
+		endfor
+		if (oldstate(2, length(data)) ~= 0)
+			if (mcol(length(data)) ~= 0)
+				printf(' ')
+			else
+				printf('╷')
+			endif
+		else
+			if (mcol(length(data)) ~= 0)
+				printf('╵')
+			else
+				printf('│')
+			endif
+		endif
+	else
+		for j = 1:spacing
+			printf('─')
+		endfor
+		if (oldstate(2, length(data)) ~= 0)
+			if (mcol(length(data)) ~= 0)
+				printf('─')
+			else
+				printf('┐')
+			endif
+		else
+			if (mcol(length(data)) ~= 0)
+				printf('┘')
+			else
+				printf('┤')
+			endif
+		endif
+	endif
+	printf('\n')
+
+	printf('│')
+	for i = 1:length(data)
+		printf('%-*.*f', spacing, precision, data(i))
+		if (mcol(i) ~= 0)
+			printf(' ')
+		else
+			printf('│')
+		endif
+	endfor
+	printf('\n')
+
+	newstate = zeros(2, length(data));
+	for i = 1:length(data)
+		newstate(1, i) = mrow(i);
+		newstate(2, i) = mcol(i);
+	endfor
+endfunction
+
+function table_end(oldstate, ndata, spacing)
+	if (oldstate(1, 1) ~= 0)
+		printf('│')
+	else
+		printf('└')
+	endif
+	for i = 1:(ndata - 1)
+		if (oldstate(1, i) ~= 0)
+			for j = 1:spacing
+				printf(' ')
+			endfor
+		else
+			for j = 1:spacing
+				printf('─')
+			endfor
+		endif
+
+		if (oldstate(2, i) ~= 0)
+			if (oldstate(1, i) ~= 0)
+				if (oldstate(1, i + 1) ~= 0)
+					printf(' ')
+				else
+					printf('╶')
+				endif
+			else
+				if (oldstate(1, i + 1) ~= 0)
+					printf('╴')
+				else
+					printf('─')
+				endif
+			endif
+		else
+			if (oldstate(1, i) ~= 0)
+				if (oldstate(1, i + 1) ~= 0)
+					printf('╵')
+				else
+					printf('└')
+				endif
+			else
+				if (oldstate(1, i + 1) ~= 0)
+					printf('┘')
+				else
+					printf('┴')
+				endif
+			endif
+		endif
+	endfor
+	if (oldstate(1, ndata) ~= 0)
+		for j = 1:spacing
+			printf(' ')
+		endfor
+	else
+		for j = 1:spacing
+			printf('─')
+		endfor
+	endif
+	if (oldstate(2, ndata) ~= 0)
+		if (oldstate(1, ndata) ~= 0)
+			printf(' ')
+		else
+			printf('─')
+		endif
+	else
+		if (oldstate(1, ndata) ~= 0)
+			printf('│')
+		else
+			printf('┘')
+		endif
+	endif
+	printf('\n')
+	printf('\n')
 endfunction
